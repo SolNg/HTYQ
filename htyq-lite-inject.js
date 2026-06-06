@@ -20,7 +20,7 @@ window.HTYQ_LITE_INJECT = (function() {
     if (recalled.length) {
       memoryText = recalled.map(m => {
         const star = '★'.repeat(Math.min(3, m.importance));
-        let line = `[${star}] ${m.summary} (Vòng ${m.round})`;
+        let line = `[${star}] ${m.summary} (Lượt ${m.round})`;
         if (m.tags.entities?.length) line += ` Liên Quan: ${m.tags.entities.join(',')}`;
         if (m.emotion && Object.keys(m.emotion).length) line += ` Cảm Xúc: ${JSON.stringify(m.emotion)}`;
         return line;
@@ -34,8 +34,8 @@ window.HTYQ_LITE_INJECT = (function() {
       const remaining = e.totalRounds - e.currentRound;
       let status = '';
       if (remaining <= 0) status = '🔥 Bùng Nổ Ngay Lập Tức';
-      else if (remaining === 1) status = '⚠️ Còn 1 vòng, sắp bùng nổ';
-      else status = `Còn ${remaining} vòng`;
+      else if (remaining === 1) status = '⚠️ Còn 1 lượt, sắp bùng nổ';
+      else status = `Còn ${remaining} lượt`;
       return `${e.name}(Lv.${e.level}) ${e.stage} ${status}`;
     }).join('；') || '无';
     
@@ -46,7 +46,7 @@ window.HTYQ_LITE_INJECT = (function() {
     let bloodText = 'Không';
     if (worldState.bloodFeudMemo && worldState.bloodFeudMemo.length) {
       bloodText = worldState.bloodFeudMemo.map(b => 
-        `${b.faction} (${b.status}, Lý do: ${b.reason}, Lần tấn công tới khoảng ${b.nextAttackRound || '?'} vòng sau)`
+        `${b.faction} (${b.status}, Lý do: ${b.reason}, Lần tấn công tới khoảng ${b.nextAttackRound || '?'} lượt sau)`
       ).join('；');
     }
     
@@ -79,7 +79,7 @@ window.HTYQ_LITE_INJECT = (function() {
 
     const panelText = `
 【Tóm Tắt Trạng Thái Thế Giới】
-Vòng: ${worldState.round}
+Lượt: ${worldState.round}
 Đại Thế Thế Giới: ${worldState.worldDigest}
 Chuỗi Sự Kiện: ${eventsText}
 Thế Lực: ${factionsText}
@@ -107,10 +107,7 @@ ${worldbookSection}
 Chú Ý: Trên đây là bối cảnh thế giới và ký ức gần đây, hãy hòa nhập tự nhiên vào cốt truyện, không thuật lại một cách cứng nhắc.
     `.trim();
 
-    // Giới hạn tổng độ dài không quá 4000 ký tự
-    if (finalContext.length > 4000) {
-      finalContext = finalContext.substring(0, 4000) + "\n... (Nội dung quá dài đã bị cắt bớt)";
-    }
+    
     return finalContext;
   }
 

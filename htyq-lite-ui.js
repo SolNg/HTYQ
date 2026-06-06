@@ -121,19 +121,25 @@ window.HTYQ_LITE_UI = (function() {
   // ---------- Hiển thị xem trước injection ----------
   function renderInjectionPreview(lastInjection) {
     if (!lastInjection) {
-      return '<div class="htyq-lite-empty">Chưa có bản ghi injection, đợi sau đối thoại vòng tiếp theo để làm mới.</div>';
+      return '<div class="htyq-lite-empty">Chưa có bản ghi injection, đợi sau đối thoại lượt tiếp theo để làm mới.</div>';
     }
     const context = lastInjection.context || '';
     const tagsUsed = lastInjection.tagsUsed || [];
+    
+    // Tách phần đầu (Tóm Tắt) và phần sau (Thế giới thư) để render đẹp hơn
+    let formattedContext = escapeHtml(context);
+    // Tô đậm các tiêu đề ngoặc vuông
+    formattedContext = formattedContext.replace(/【(.*?)】/g, '<strong style="color:var(--text-accent); display:block; margin-top:8px;">【$1】</strong>');
+    
     return `
       <div class="htyq-injection-meta">
-        <span>📌 Vòng ${lastInjection.round}</span>
+        <span>📌 Lượt ${lastInjection.round}</span>
         <span>📐 ${context.length} ký tự</span>
         <span>🕐 ${new Date(lastInjection.timestamp).toLocaleTimeString()}</span>
       </div>
       <div class="htyq-tag-container">${renderTagsHtml(tagsUsed)}</div>
-      <div class="htyq-injection-preview-text">${escapeHtml(context.substring(0, 200))}${context.length > 200 ? '...' : ''}</div>
-      ${context.length > 200 ? `<span class="htyq-injection-detail-toggle" data-expand-injection>▶ Mở Rộng Tất Cả</span><div class="htyq-injection-preview-text" style="display:none">${escapeHtml(context)}</div>` : ''}
+      <div class="htyq-injection-preview-text" style="white-space: pre-wrap; line-height: 1.5; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 4px;">${formattedContext.substring(0, 300)}${context.length > 300 ? '...' : ''}</div>
+      ${context.length > 300 ? `<span class="htyq-injection-detail-toggle" data-expand-injection>▶ Mở Rộng Tất Cả</span><div class="htyq-injection-preview-text" style="display:none; white-space: pre-wrap; line-height: 1.5; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 4px;">${formattedContext}</div>` : ''}
     `;
   }
 
@@ -170,7 +176,7 @@ window.HTYQ_LITE_UI = (function() {
 
     container.innerHTML = `
       ${timeBarHtml}
-      <div class="htyq-lite-card"><h4>📊 Vòng</h4><div>${state.round}</div></div>
+      <div class="htyq-lite-card"><h4>📊 Vòng</h4><div>${window.HTYQ_LITE_CORE.getActualRoundCount()}</div></div>
       <div class="htyq-lite-card"><h4>🏷️ Nhãn Hiện Tại</h4><div class="htyq-tag-container">${tagsHtml}</div></div>
       <div class="htyq-lite-card"><h4>🌍 Tóm Tắt Thế Giới</h4><div>${escapeHtml(state.worldDigest)}</div></div>
       <div class="htyq-lite-card"><h4>⭐ Danh Tiếng</h4><div>Giang Hồ:${rep.jianghu} Quan Phủ:${rep.official}<br>Dân Gian:${rep.folk} Hắc Đạo:${rep.underworld}</div></div>
@@ -263,10 +269,10 @@ window.HTYQ_LITE_UI = (function() {
     statsDiv.className = 'htyq-memory-stats';
     statsDiv.innerHTML = `
       <strong>📚 Thống Kê Ký Ức</strong><br>
-      Ký Ức Gốc: ${state.memories.length}<br>
-      Tóm Tắt Chương: ${state.chapterSummaries.length}<br>
-      Tóm Tắt Quyển: ${state.volumeSummaries.length}<br>
-      Thực Thể Cảm Xúc: ${Object.keys(state.emotionMap).length}
+      Ký Ức Gốc: ${ (state.memories || []).length }<br>
+      Tóm Tắt Chương: ${ (state.chapterSummaries || []).length }<br>
+      Tóm Tắt Quyển: ${ (state.volumeSummaries || []).length }<br>
+      Thực Thể Cảm Xúc: ${ Object.keys(state.emotionMap || {}).length }
     `;
     container.appendChild(statsDiv);
 
@@ -284,7 +290,7 @@ window.HTYQ_LITE_UI = (function() {
       }
       resultsDiv.innerHTML = recent.map(m => `
         <div class="htyq-lite-memory-item ${getImportanceClass(m.importance)}">
-          <div class="memory-summary"><strong>[Vòng ${m.round}] [Độ Quan Trọng ${'★'.repeat(Math.min(3, m.importance))}]</strong> ${escapeHtml(m.summary)}</div>
+          <div class="memory-summary"><strong>[Lượt ${m.round}] [Độ Quan Trọng ${'★'.repeat(Math.min(3, m.importance))}]</strong> ${escapeHtml(m.summary)}</div>
           <small>Nhãn: Thực Thể ${(m.tags.entities || []).join(',') || 'Không'} | Chủ Đề ${(m.tags.topics || []).join(',') || 'Không'}</small>
           ${m.context ? `<details><summary>📄 Chi Tiết</summary><pre>${escapeHtml(m.context)}</pre></details>` : ''}
         </div>
@@ -305,7 +311,7 @@ window.HTYQ_LITE_UI = (function() {
       }
       resultsDiv.innerHTML = recalled.map(m => `
         <div class="htyq-lite-memory-item ${getImportanceClass(m.importance)}">
-          <div class="memory-summary"><strong>[Vòng ${m.round}] [Độ Quan Trọng ${'★'.repeat(Math.min(3, m.importance))}]</strong> ${escapeHtml(m.summary)}</div>
+          <div class="memory-summary"><strong>[Lượt ${m.round}] [Độ Quan Trọng ${'★'.repeat(Math.min(3, m.importance))}]</strong> ${escapeHtml(m.summary)}</div>
           <small>Nhãn: Thực Thể ${(m.tags.entities || []).join(',') || 'Không'}</small>
           ${m.context ? `<details><summary>📄 Chi Tiết</summary><pre>${escapeHtml(m.context)}</pre></details>` : ''}
         </div>
@@ -346,7 +352,7 @@ window.HTYQ_LITE_UI = (function() {
         <div class="htyq-lite-input-group">
           <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
             <input type="checkbox" id="htyq-auto-evolve" ${settings.autoEvolve !== false ? 'checked' : ''}>
-            <span>Tự Động Tiến Hóa (sau mỗi vòng AI trả lời)</span>
+            <span>Tự Động Tiến Hóa (sau mỗi lượt AI trả lời)</span>
           </label>
         </div>
         <div class="htyq-lite-input-group">
@@ -370,8 +376,11 @@ window.HTYQ_LITE_UI = (function() {
       </div>
       <div class="htyq-lite-card">
         <h4>🔍 Gỡ Lỗi Injection</h4>
-        <div id="htyq-last-injection-preview">Nhấp để làm mới và xem nội dung injection trước đó</div>
-        <button id="htyq-refresh-injection" class="htyq-lite-btn">Làm Mới Nội Dung Injection</button>
+        <textarea id="htyq-last-injection-textarea" style="width: 100%; min-height: 200px; padding: 8px; font-family: monospace; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; resize: vertical;" placeholder="Chưa có bản ghi injection..."></textarea>
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button id="htyq-refresh-injection" class="htyq-lite-btn">Làm Mới</button>
+          <button id="htyq-save-injection" class="htyq-lite-btn htyq-lite-btn-purple">Cập Nhật Bơm Lại</button>
+        </div>
       </div>
       <div class="htyq-lite-card">
         <h4>📁 Quản Lý Dữ Liệu</h4>
@@ -443,18 +452,32 @@ window.HTYQ_LITE_UI = (function() {
       });
     }
     const refreshInjection = container.querySelector('#htyq-refresh-injection');
-    const injectionPreview = container.querySelector('#htyq-last-injection-preview');
-    if (refreshInjection && injectionPreview) {
+    const saveInjectionBtn = container.querySelector('#htyq-save-injection');
+    const injectionTextarea = container.querySelector('#htyq-last-injection-textarea');
+    
+    if (refreshInjection && injectionTextarea) {
       const showInjection = () => {
-        const state = core.loadState();
-        if (state.lastInjection) {
-          const fullContext = state.lastInjection.context || '';
-          injectionPreview.innerHTML = `<details><summary>Vòng ${state.lastInjection.round} vào lúc ${new Date(state.lastInjection.timestamp).toLocaleTimeString()}</summary><pre>${escapeHtml(fullContext)}</pre></details>`;
+        const state = window.HTYQ_LITE_CORE.loadState();
+        if (state.lastInjection && state.lastInjection.context) {
+          injectionTextarea.value = state.lastInjection.context;
         } else {
-          injectionPreview.innerHTML = 'Chưa có bản ghi injection, vui lòng đợi 1 vòng hội thoại rồi làm mới.';
+          injectionTextarea.value = '';
         }
       };
       refreshInjection.addEventListener('click', showInjection);
+      
+      if (saveInjectionBtn) {
+        saveInjectionBtn.addEventListener('click', () => {
+          const state = window.HTYQ_LITE_CORE.loadState();
+          if (state.lastInjection) {
+            state.lastInjection.context = injectionTextarea.value;
+            window.HTYQ_LITE_CORE.saveState(state);
+            alert('Đã cập nhật nội dung injection thủ công!');
+          } else {
+            alert('Chưa có injection state để cập nhật.');
+          }
+        });
+      }
       showInjection();
     }
     const resetBtn = container.querySelector('#htyq-reset-world');
@@ -520,7 +543,7 @@ window.HTYQ_LITE_UI = (function() {
           <input type="radio" name="htyq-drive-mode" value="manual" ${isManual ? 'checked' : ''}>
           <div>
             <div class="htyq-drive-label">Điều Chỉnh Thủ Công</div>
-            <div class="htyq-drive-desc">Tắt hệ thống thời gian, hoàn toàn tự động suy diễn theo số vòng bạn thiết lập</div>
+            <div class="htyq-drive-desc">Tắt hệ thống thời gian, hoàn toàn tự động suy diễn theo số lượt bạn thiết lập</div>
           </div>
         </label>
 
@@ -545,7 +568,7 @@ window.HTYQ_LITE_UI = (function() {
         <div class="htyq-engine-section-title">⚙️ Thông Số Điều Chỉnh Thủ Công</div>
 
         <div class="htyq-param-row">
-          <label>Mỗi Vòng =</label>
+          <label>Mỗi Lượt =</label>
           <input type="number" id="htyq-minutes-per-round" value="${minutesPerRound}" min="1" max="60">
           <small>phút (1~60)</small>
         </div>
@@ -553,7 +576,7 @@ window.HTYQ_LITE_UI = (function() {
         <div class="htyq-param-row">
           <label>Khoảng Cách Suy Diễn</label>
           <input type="number" id="htyq-evolve-interval" value="${evolveInterval}" min="1" max="100">
-          <small>vòng (1~100)</small>
+          <small>lượt (1~100)</small>
         </div>
 
         <div class="htyq-param-row">
@@ -575,20 +598,20 @@ window.HTYQ_LITE_UI = (function() {
       <div class="htyq-engine-section">
         <div class="htyq-engine-section-title">📊 Trạng Thái Hiện Tại</div>
         <div class="htyq-state-row">
-          <span class="htyq-state-label">Số Vòng Hội Thoại</span>
-          <span class="htyq-state-value">${state.round}</span>
+          <span class="htyq-state-label">Số Lượt Hội Thoại</span>
+          <span class="htyq-state-value">${window.HTYQ_LITE_CORE.getActualRoundCount()}</span>
         </div>
         <div class="htyq-state-row">
           <span class="htyq-state-label">Thời Gian Thế Giới</span>
           <span class="htyq-state-value">${timeStr} (${state.inWorldMinutes || 0} phút)</span>
         </div>
         <div class="htyq-state-row">
-          <span class="htyq-state-label">Số Vòng Hợp Lệ</span>
+          <span class="htyq-state-label">Số Lượt Hợp Lệ</span>
           <span class="htyq-state-value">${state.lastTimeCheckRound || 0}</span>
         </div>
         <div class="htyq-state-row">
-          <span class="htyq-state-label">Lần Suy Diễn Trước</span>
-          <span class="htyq-state-value">Vòng ${state.lastEvolveRound}</span>
+          <span class="htyq-state-label">Lượt Suy Diễn Trước</span>
+          <span class="htyq-state-value">Lượt ${state.lastEvolveRound}</span>
         </div>
       </div>
 
@@ -1021,6 +1044,7 @@ window.HTYQ_LITE_UI = (function() {
     const tabsHtml = `
       <button data-tab="overview" class="htyq-lite-tab active">Tổng Quan</button>
       <button data-tab="world" class="htyq-lite-tab">Thế Giới</button>
+      <button data-tab="rumors" class="htyq-lite-tab">Tin Đồn</button>
       <button data-tab="memory" class="htyq-lite-tab">Ký Ức</button>
       <button data-tab="settings" class="htyq-lite-tab">Cài Đặt</button>
       <button data-tab="engine" class="htyq-lite-tab">Động Cơ</button>
@@ -1028,6 +1052,7 @@ window.HTYQ_LITE_UI = (function() {
     const viewsHtml = `
       <div id="htyq-view-overview" class="htyq-lite-view active"></div>
       <div id="htyq-view-world" class="htyq-lite-view"></div>
+      <div id="htyq-view-rumors" class="htyq-lite-view"></div>
       <div id="htyq-view-memory" class="htyq-lite-view"></div>
       <div id="htyq-view-settings" class="htyq-lite-view"></div>
       <div id="htyq-view-engine" class="htyq-lite-view"></div>

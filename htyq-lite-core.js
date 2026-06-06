@@ -74,7 +74,23 @@ window.HTYQ_LITE_CORE = (function() {
     return state;
   }
 
-  function loadState() {
+  
+  function getActualRoundCount() {
+    try {
+      const ctx = (typeof SillyTavern !== 'undefined' && SillyTavern.getContext) ? SillyTavern.getContext() : null;
+      if (ctx && Array.isArray(ctx.chat)) {
+        let count = 0;
+        for (let i = 0; i < ctx.chat.length; i++) {
+          const msg = ctx.chat[i];
+          if (!msg.is_user && !msg.is_system) count++;
+        }
+        return count;
+      }
+    } catch(e) {}
+    return loadState().round; // fallback
+  }
+
+function loadState() {
     const chatId = getChatId();
     const key = STORAGE_PREFIX + chatId;
     const raw = localStorage.getItem(key);
@@ -215,16 +231,22 @@ window.HTYQ_LITE_CORE = (function() {
 
   function addRumor(state, rumor) {
     if (!state.rumors) state.rumors = [];
-    if (!rumor.addedRound) rumor.addedRound = state.round;
+    if (!rumor.addedRound) rumor.addedRound = window.HTYQ_LITE_CORE.getActualRoundCount();
     if (!rumor.heatLevel) rumor.heatLevel = rumor.heat || 'Trung';
-    state.rumors.unshift(rumor);
-    if (state.rumors.length > 30) state.rumors.pop();
+    
+    // Deduplicate
+    const isDuplicate = state.rumors.some(r => r.content === rumor.content);
+    if (!isDuplicate) {
+      state.rumors.unshift(rumor);
+    }
+    // Limit to 10
+    if (state.rumors.length > 10) state.rumors.length = 10;
     saveState(state);
   }
 
   return {
     getDefaultState,
-    getChatId,
+    getChatId, getActualRoundCount,
     loadState,
     saveState,
     addMemory,

@@ -75,10 +75,10 @@ window.HTYQ_LITE_MEMORY = (function() {
 
     const locationText = locationHint ? `Địa điểm hiện tại: ${locationHint}\n` : '';
     const prompt = `Bạn là một nhân viên ghi chép cốt truyện khách quan và chuyên gia trích xuất nhãn. Vui lòng dựa vào đối thoại dưới đây, hoàn thành hai nhiệm vụ:
-1. Dùng khoảng 150 chữ tóm tắt cốt truyện vòng này (chỉ trần thuật sự thật khách quan, không đánh giá).
+1. Dùng khoảng 150 chữ tóm tắt cốt truyện lượt này (chỉ trần thuật sự thật khách quan, không đánh giá).
 2. Trích xuất toàn bộ nhãn quan trọng xuất hiện trong đối thoại, điền theo thể loại.
 
-Vòng thứ: Vòng ${round}
+Lượt thứ: Lượt ${round}
 ${locationText}
 Tin nhắn người dùng: ${userMsg.substring(0, 600)}
 AI hồi đáp: ${aiMsg.substring(0, 600)}
@@ -100,7 +100,7 @@ Chú ý:
 - locations: địa điểm cụ thể (thành thị, căn phòng, kiến trúc v.v.).
 - factions: bang phái, tổ chức, gia tộc v.v.
 - topics: chủ đề sự kiện cốt lõi (như "giao dịch", "truy sát", "kết minh").
-- emotions: bầu không khí chính của vòng này (như "căng thẳng", "thân thiện", "bi thương").
+- emotions: bầu không khí chính của lượt này (như "căng thẳng", "thân thiện", "bi thương").
 - Mỗi mảng điền tối đa 5 nhãn liên quan nhất, nếu không có thì để trống [].`;
 
     try {
@@ -127,7 +127,7 @@ Chú ý:
     const topics = tags.topics?.slice(0, 3) || [];
     const emotions = tags.emotions?.slice(0, 2) || [];
 
-    let summary = `Vòng ${round}`;
+    let summary = `Lượt ${round}`;
     if (locations.length) summary += `, ở ${locations.join('、')}`;
     if (entities.length) summary += `, ${entities.join('、')}`;
     if (topics.length) summary += ` liên quan ${topics.join('、')}`;
@@ -138,7 +138,7 @@ Chú ý:
       summary += `，${actionMatch[1]}`;
     }
     if (summary.length < 20) {
-      summary = `Vòng ${round}: Người dùng và AI đã tiến hành đối thoại.`;
+      summary = `Lượt ${round}: Người dùng và AI đã tiến hành đối thoại.`;
     }
     return summary;
   }
@@ -364,8 +364,8 @@ Ví dụ định dạng đầu ra:
               faction: em.entity,
               reason: em.reason || 'Đảo ngược cảm xúc: Từ Thân Thiện biến thành Bất Cộng Đái Thiên',
               status: 'Đang theo dõi',
-              lastActionRound: state.round,
-              nextAttackRound: state.round + Math.floor(Math.random() * 6) + 5,
+              lastActionRound: window.HTYQ_LITE_CORE.getActualRoundCount(),
+              nextAttackRound: window.HTYQ_LITE_CORE.getActualRoundCount() + Math.floor(Math.random() * 6) + 5,
               attackCount: 0
             });
             console.log(`[HTYQ Emotion] Ký lục huyết cừu thêm mới: ${em.entity}`);
@@ -377,7 +377,7 @@ Ví dụ định dạng đầu ra:
     }
 
     // Nếu không có kích hoạt cảm xúc nào nhưng tên thực thể có trong bản đồ cảm xúc, kiểm tra xem có khác với thái độ cũ không
-    // (Vòng lặp này đã được xử lý ở trên)
+    // (Lượt lặp này đã được xử lý ở trên)
 
     return memory;
   }
@@ -387,9 +387,9 @@ Ví dụ định dạng đầu ra:
     const memories = state.memories.filter(m => m.round >= startRound && m.round <= endRound && m.type === 'round');
     if (memories.length === 0) return;
 
-    const combined = memories.map(m => `[Vòng ${m.round}] ${m.summary}`).join('\n');
+    const combined = memories.map(m => `[Lượt ${m.round}] ${m.summary}`).join('\n');
     let structuredEvents = null;
-    let fallbackSummary = `Vòng ${startRound}-${endRound}: ${memories.map(m => m.summary).join('；')}`.substring(0, 500);
+    let fallbackSummary = `Lượt ${startRound}-${endRound}: ${memories.map(m => m.summary).join('；')}`.substring(0, 500);
 
     const settings = JSON.parse(localStorage.getItem('htyq_lite_settings') || '{}');
     if (settings.smartTagging !== false) {
@@ -510,7 +510,7 @@ Ví dụ định dạng đầu ra:
       else if (mem.importance === 3) score += 1;
 
       // Trọng số thời gian
-      const age = state.round - (mem.round || 0);
+      const age = window.HTYQ_LITE_CORE.getActualRoundCount() - (mem.round || 0);
       if (age < 10) score += 2;
       else if (age < 30) score += 1;
 

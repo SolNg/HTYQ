@@ -3,9 +3,9 @@
 // ★ Nhật Ký Sửa Đổi ★
 // 2026-06-05 v2.1.0
 //   - Tăng cường forceTriggerEvents: sự kiện đếm ngược về 0 bắt buộc bùng nổ, đưa ra biểu hiện cốt truyện hợp lý
-//   - Tăng cường advanceBloodFeud: huyết cừu không bao giờ treo, tạo hành động truy sát mỗi 5-10 vòng
-//   - Cơ chế treo chuỗi sự kiện: cho phép trạng thái "treo-chuẩn bị vòng ngoài" và ghi lại nguyên nhân cùng điều kiện khôi phục
-//   - Thúc đẩy chuỗi sự kiện: khi còn 1 vòng, tự động đánh dấu "sắp bùng nổ" để ảnh hưởng đến nhãn dự đoán
+//   - Tăng cường advanceBloodFeud: huyết cừu không bao giờ treo, tạo hành động truy sát mỗi 5-10 lượt
+//   - Cơ chế treo chuỗi sự kiện: cho phép trạng thái "treo-chuẩn bị lượt ngoài" và ghi lại nguyên nhân cùng điều kiện khôi phục
+//   - Thúc đẩy chuỗi sự kiện: khi còn 1 lượt, tự động đánh dấu "sắp bùng nổ" để ảnh hưởng đến nhãn dự đoán
 //   - Tăng cường decayRumors: thêm đột biến tin đồn (có thể đột biến thành tin đồn khác)
 // 2026-06-05 v2.2.0
 //   - Trong callEvolutionAPI await tagsGen.generatePredictionTags (phối hợp cải tiến bất đồng bộ)
@@ -89,7 +89,7 @@ window.HTYQ_LITE_EVOLUTION = (function() {
       // Xử lý trạng thái treo
       if (ev.stage === 'Treo' && ev.suspendCondition) {
         // Mỗi lần lặp kiểm tra điều kiện treo có thỏa mãn không (thông qua nhãn để đánh giá ngữ cảnh có thay đổi không)
-        // Quy tắc đơn giản: treo quá 3 vòng tự động khôi phục
+        // Quy tắc đơn giản: treo quá 3 lượt tự động khôi phục
         if (ev.suspendRounds === undefined) ev.suspendRounds = 0;
         ev.suspendRounds++;
         if (ev.suspendRounds >= 3) {
@@ -130,7 +130,7 @@ window.HTYQ_LITE_EVOLUTION = (function() {
         console.log(`[HTYQ Evolution] 🚨 Bắt buộc kích hoạt sự kiện: ${ev.name}`);
 
       } else if (remaining <= 1 && ev.stage !== 'Đã Bùng Nổ' && ev.stage !== 'Treo') {
-        // Còn 1 vòng: đánh dấu là sắp bùng nổ, nhưng không bắt buộc thúc đẩy
+        // Còn 1 lượt: đánh dấu là sắp bùng nổ, nhưng không bắt buộc thúc đẩy
         // Khi tạo nhãn sẽ ảnh hưởng đến trọng số nhãn dự đoán
         ev.stage = 'Sắp Bùng Nổ';
         ev.currentRound++;
@@ -138,7 +138,7 @@ window.HTYQ_LITE_EVOLUTION = (function() {
       } else if (remaining > 0 && ev.stage !== 'Đã Bùng Nổ' && ev.stage !== 'Treo') {
         ev.currentRound++;
         if (remaining <= 2) {
-          // Còn 2 vòng thì vào giai đoạn lên men
+          // Còn 2 lượt thì vào giai đoạn lên men
           if (ev.stage === 'Nảy Mầm') ev.stage = 'Lên Men';
           console.log(`[HTYQ Evolution] Thúc đẩy sự kiện: ${ev.name} (${ev.currentRound}/${ev.totalRounds})`);
         }
@@ -148,7 +148,7 @@ window.HTYQ_LITE_EVOLUTION = (function() {
     return triggered;
   }
 
-  // ========== Tự động truy sát huyết cừu (Bản tăng cường: Không bao giờ treo, tuần hoàn 5-10 vòng) ==========
+  // ========== Tự động truy sát huyết cừu (Bản tăng cường: Không bao giờ treo, tuần hoàn 5-10 lượt) ==========
   function advanceBloodFeud(state) {
     if (!state.bloodFeudMemo || !state.bloodFeudMemo.length) return false;
     let advanced = false;
@@ -157,12 +157,12 @@ window.HTYQ_LITE_EVOLUTION = (function() {
 
       // Khởi tạo chu kỳ truy sát lần đầu
       if (!bf.nextAttackRound) {
-        bf.nextAttackRound = state.round + Math.floor(Math.random() * 6) + 5; // Sau 5-10 vòng
+        bf.nextAttackRound = state.round + Math.floor(Math.random() * 6) + 5; // Sau 5-10 lượt
         bf.status = bf.status || 'Đang Theo Dõi';
         bf.attackCount = bf.attackCount || 0;
       }
 
-      // Đạt đến số vòng truy sát
+      // Đạt đến số lượt truy sát
       if (state.round >= bf.nextAttackRound) {
         bf.lastActionRound = state.round;
         bf.attackCount = (bf.attackCount || 0) + 1;
@@ -181,7 +181,7 @@ window.HTYQ_LITE_EVOLUTION = (function() {
           });
         } else {
           bf.status = 'Đang Truy Sát';
-          // Lần tấn công tiếp theo: Sau 5-10 vòng
+          // Lần tấn công tiếp theo: Sau 5-10 lượt
           bf.nextAttackRound = state.round + Math.floor(Math.random() * 6) + 5;
 
           core.addMemory(state, {
@@ -197,7 +197,7 @@ window.HTYQ_LITE_EVOLUTION = (function() {
         }
         advanced = true;
       } else if (bf.status === 'Đang Truy Sát' && (state.round - bf.lastActionRound) >= 3) {
-        // Đang truy sát nhưng đã qua 3 vòng không có hành động → Đang theo dõi
+        // Đang truy sát nhưng đã qua 3 lượt không có hành động → Đang theo dõi
         bf.status = 'Đang Theo Dõi';
       }
     }
@@ -232,12 +232,12 @@ window.HTYQ_LITE_EVOLUTION = (function() {
 
 1. **Chuỗi sự kiện**: Duy trì ít nhất 1~3 sự kiện. Mỗi sự kiện phải có: name, level(1-4), stage(Nảy Mầm/Lên Men/Đến Gần/Đã Bùng Nổ/Dư Âm), currentRound, totalRounds(3-8), desc, trigger.
    - Nếu có sổ tay huyết cừu, phải tạo chuỗi sự kiện tương ứng.
-   - Chuỗi sự kiện đã có sẽ thúc đẩy theo vòng (currentRound++), nếu currentRound >= totalRounds thì stage đổi thành "Đã Bùng Nổ".
-   - Không cho phép tình trạng "còn 1 vòng kéo dài 5 vòng". Nếu cốt truyện cần trì hoãn, phải giải thích nguyên nhân treo trong bảng điều khiển (reason/suspendCondition/suspendResumeNote).
+   - Chuỗi sự kiện đã có sẽ thúc đẩy theo lượt (currentRound++), nếu currentRound >= totalRounds thì stage đổi thành "Đã Bùng Nổ".
+   - Không cho phép tình trạng "còn 1 lượt kéo dài 5 lượt". Nếu cốt truyện cần trì hoãn, phải giải thích nguyên nhân treo trong bảng điều khiển (reason/suspendCondition/suspendResumeNote).
 2. **Thế lực**: Duy trì ít nhất 3 thế lực. Mỗi thế lực phải có: name, cohesion(Đoàn Kết/Lỏng Lẻo/Phân Liệt), resources(Dồi Dào/Căng Thẳng/Khô Kiệt), currentGoal(chuỗi), attentionToUser(Không/Quan Sát/Lôi Kéo/Bài Xích).
    - Nếu thế lực ít hơn 3, phải tạo thế lực mới.
 3. **Tin đồn**: Tạo ít nhất 2 tin đồn. Mỗi tin đồn bao gồm: content, scope(khu vực), credibility(Cao/Trung Bình/Thấp), source, heat(nhiệt độ).
-4. **Tóm tắt thế giới (world_digest)**: 150-200 chữ, mô tả quá trình diễn biến ngầm của thế giới vòng này (sự kiện thúc đẩy, tiến hóa tin đồn, NPC hành động độc lập, thay đổi nhóm), **Cấm nhắc đến {{user}}**.
+4. **Tóm tắt thế giới (world_digest)**: 150-200 chữ, mô tả quá trình diễn biến ngầm của thế giới lượt này (sự kiện thúc đẩy, tiến hóa tin đồn, NPC hành động độc lập, thay đổi nhóm), **Cấm nhắc đến {{user}}**.
 5. **Danh tiếng (economy/reputation)**: Có thể tinh chỉnh marketTrend, fundsStatus v.v. dựa trên nội dung đối thoại.
 6. **Nếu không có thay đổi, không được trả về mảng rỗng. Phải tạo ít nhất một tin đồn hoặc một thay đổi nhỏ của sự kiện.**
 7. **Tiến độ nhóm**: Mỗi thế lực phải chứa mô tả tiến độ (chỉ văn bản), độ đoàn kết, dự trữ tài nguyên cần dao động định kỳ.
@@ -245,16 +245,16 @@ window.HTYQ_LITE_EVOLUTION = (function() {
 
 9. **Sổ tay huyết cừu (bloodFeudMemo)**: Khi cốt truyện sinh ra huyết cừu không thể hóa giải (như nhân vật cốt lõi bị giết, người thân bị hại), phải thêm mục vào mảng này. Định dạng: [{ faction, reason, status, lastActionRound, nextAttackRound }]. status khởi tạo là "Đang Theo Dõi". Mục đã có có thể cập nhật trạng thái (như "Đang Truy Sát", "Đã Kết Thúc"). Mảng này do mô hình duy trì.
 10. **Quan hệ thế lực (factionRelations)**: Tùy chọn nhưng khuyến nghị. Khi quan hệ giữa các thế lực thay đổi, xuất mảng này. Mỗi mục có định dạng: { factionA, factionB, relation, level, trend }. relation chỉ có thể dùng: Huyết Minh/Minh Hữu/Hữu Hảo/Trung Lập/Lạnh Nhạt/Căng Thẳng/Địch Đối/Thế Cừu. Không có thay đổi có thể không xuất.
-11. **Chuỗi nhân quả (causalChain)**: Tùy chọn. Khi vòng này xảy ra quan hệ nhân quả rõ ràng (Sự kiện A dẫn đến Sự kiện B, hoặc hành động người chơi dẫn đến thay đổi thế lực v.v.) thì xuất. Mỗi mục định dạng: { event, progress, manifestation }. Không có quan hệ nhân quả mạnh mẽ có thể không xuất.
+11. **Chuỗi nhân quả (causalChain)**: Tùy chọn. Khi lượt này xảy ra quan hệ nhân quả rõ ràng (Sự kiện A dẫn đến Sự kiện B, hoặc hành động người chơi dẫn đến thay đổi thế lực v.v.) thì xuất. Mỗi mục định dạng: { event, progress, manifestation }. Không có quan hệ nhân quả mạnh mẽ có thể không xuất.
 `;
 
-    const prompt = `Bạn là một động cơ tiến hóa thế giới. Sau mỗi vòng đối thoại, thế giới phải tiến thêm một bước.
+    const prompt = `Bạn là một động cơ tiến hóa thế giới. Sau mỗi lượt đối thoại, thế giới phải tiến thêm một bước.
 **Cập nhật trạng thái thế giới nghiêm ngặt theo các quy tắc dưới đây, chỉ xuất JSON, không thêm chữ nào khác.**
 
 ${engineRules}
 ${worldbookSection}
 
-## Trạng thái thế giới hiện tại (Vòng ${state.round})
+## Trạng thái thế giới hiện tại (Lượt ${state.round})
 ${JSON.stringify({
   round: state.round,
   events: state.events.map(e => ({ name: e.name, stage: e.stage, currentRound: e.currentRound, totalRounds: e.totalRounds })),
@@ -267,7 +267,7 @@ ${JSON.stringify({
   causalChain: state.causalChain
 }, null, 2)}
 
-## Đối thoại vòng này
+## Đối thoại lượt này
 Người dùng: ${userMsg.substring(0, 500)}
 AI: ${aiMsg.substring(0, 500)}
 
@@ -284,7 +284,7 @@ AI: ${aiMsg.substring(0, 500)}
   ],
   "economy": { "marketTrend": "Bình Ổn", "fundsStatus": "Thiếu Thốn" },
   "reputation": { "jianghu": "Vô Danh", "official": "Vô Danh", "folk": "Vô Danh", "underworld": "Vô Danh" },
-  "world_digest": "Sự kiện phục cừu của Huyết Đao Môn tiếp tục thúc đẩy, đã vào giai đoạn lên men; gần Thanh Thạch Quan xuất hiện tin đồn quan binh thiết lập chốt chặn, thương khách bắt đầu đi đường vòng; mâu thuẫn nội bộ bang phái trong thành gia tăng.",
+  "world_digest": "Sự kiện phục cừu của Huyết Đao Môn tiếp tục thúc đẩy, đã vào giai đoạn lên men; gần Thanh Thạch Quan xuất hiện tin đồn quan binh thiết lập chốt chặn, thương khách bắt đầu đi đường lượt; mâu thuẫn nội bộ bang phái trong thành gia tăng.",
   "causalChain": [
     { "event": "Huyết Đao Môn Phục Cừu", "progress": "Lệnh truy nã khiến người trên giang hồ bắt đầu chú ý {{user}}", "manifestation": "Ánh mắt ông chủ khách sạn nhìn {{user}} trở nên khác lạ" }
   ],
@@ -297,7 +297,9 @@ AI: ${aiMsg.substring(0, 500)}
   ]
 }
 
-Chú ý: Nếu mô hình không thể tạo đủ nội dung, thà tạo nội dung mặc định hợp lý (như "Thế giới bình yên không có sự kiện lớn"), cũng không được trả về mảng rỗng.`;
+Chú ý quan trọng:
+1. KHÔNG BAO GIỜ viết "Thế giới bình yên không có sự kiện lớn". Nếu không có sự kiện lớn, hãy suy diễn chi tiết về các động thái nhỏ ngầm, mâu thuẫn cá nhân, biến động vật giá, hoặc hành tung của các NPC khác.
+2. Các trường như Đại thế thế giới (world_digest) phải dài tối thiểu 2-3 câu, miêu tả sinh động chi tiết.`;
 
     try {
       const rawResult = await callApi(prompt, 2000, 0.7);
@@ -437,11 +439,11 @@ Chú ý: Nếu mô hình không thể tạo đủ nội dung, thà tạo nội d
       else if (credVal <= 2) rumor.credibility = 'Trung Bình';
       else rumor.credibility = 'Cao';
 
-      // Nhiệt độ là Lạnh và tuổi vượt quá 5 vòng → Xóa bỏ
+      // Nhiệt độ là Lạnh và tuổi vượt quá 5 lượt → Xóa bỏ
       if (newHeatLevel === 'Lạnh' && age >= 5) {
         toRemove.push(i);
       }
-      // Nhiệt độ là Nóng và tuổi vượt quá 8 vòng và trúng xác suất ngẫu nhiên → Đột biến (tin đồn cũ đột biến thành phiên bản mới)
+      // Nhiệt độ là Nóng và tuổi vượt quá 8 lượt và trúng xác suất ngẫu nhiên → Đột biến (tin đồn cũ đột biến thành phiên bản mới)
       if (newHeatLevel === 'Nóng' && age >= 8 && Math.random() < 0.15) {
         toMutate.push(i);
       }
@@ -488,7 +490,7 @@ Chú ý: Nếu mô hình không thể tạo đủ nội dung, thà tạo nội d
       decayRumors(state);
       core.saveState(state);
 
-      // Mỗi 20 vòng dọn dẹp kho ký ức một lần
+      // Mỗi 20 lượt dọn dẹp kho ký ức một lần
       if (state.round % 20 === 0) {
         core.cleanupState(state);
       }
