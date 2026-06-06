@@ -1,0 +1,10 @@
+{
+  "display_name": "🧠 HTYQ Lite",
+  "author": "HTYQ",
+  "description": "Động Cơ Hoạt Thể Bản Nhẹ: Vận Hành Bằng Ký Ức + Thế Giới Thư + Trạng Thái",
+  "version": "2.3.0",
+  "license": "MIT",
+  "type": "extension",
+  "js": "htyq-lite.js",
+  "css": "style.css"
+}

@@ -1,0 +1,897 @@
+/* Style HTYQ Lite v2.3.0 — Phiên bản màu Morandi làm mới */
+/* ============================================================ */
+/* ★ Nhật Ký Sửa Đổi ★
+   2026-06-05 v2.1.0
+     - [Bug 2] Thêm truy vấn phương tiện (tablet 768px / di động 480px)
+     - [Bug 2] Bố cục linh hoạt thay thế kích thước cố định
+     - [Bug 3] Thêm line-height, word-break, khoảng cách đoạn
+     - Tối ưu hóa tính nhất quán của thẻ, danh sách, nút
+
+   2026-06-05 v2.1.1 (Làm mới UI)
+     - Thêm biến CSS :root để kiểm soát thống nhất
+     - Sử dụng var() thay thế tất cả giá trị màu/khoảng cách code cứng
+     - Thêm -webkit-font-smoothing làm mịn phông chữ
+     - Thêm .htyq-lite-drag-handle / .htyq-lite-handle-bar / .htyq-lite-panel-close-mobile
+     - Thêm .htyq-lite-btn-purple / .htyq-lite-btn-danger
+     - Padding trên di động tối ưu 8px→12px 14px
+     - Tab di động min-height: 44px + sticky tabs
+     - Xóa .htyq-lite-button vô dụng
+     - Chuyển tất cả màu inline style sang lớp CSS
+
+   2026-06-05 v2.2.0 (Cải thiện UI desktop)
+     - Kích thước mặc định của bảng điều khiển đổi thành 560px × 70vh, max-height 800px, min-height 400px
+     - Màn hình nhỏ (max-height:700px) chiều cao bảng điều khiển 80vh
+     - Bảng điều khiển desktop nền bán trong suốt (rgba + backdrop-filter)
+     - Màu phân cấp độ quan trọng ký ức (vàng/tím/xanh lam/xám)
+     - Màu phân loại nhãn (thực thể xanh lam/địa điểm xanh lá/thế lực cam/chủ đề tím/cảm xúc hồng/trạng thái lục lam)
+     - Kiểu khu vực xem trước injection (meta/nhãn/văn bản xem trước/nút mở rộng)
+     - Mở/gập thẻ (desktop click h4 chuyển ▶/▼)
+
+   2026-06-05 v2.3.0 (Làm mới màu Morandi)
+     - Thay thế tất cả màu bằng tông xám ấm Morandi (hệ thống biến CSS)
+     - Thêm kiểu Tab động cơ (chế độ truyền động/thông số thủ công/công cụ gỡ lỗi)
+     - Thêm màu nhãn trạng thái, biểu tượng phong ấn, v.v.
+     - Di động và desktop sử dụng cùng một bộ biến
+*/
+/* ============================================================ */
+
+/* ---------- Biến CSS (Tông xám ấm Morandi) ---------- */
+:root {
+  --bg-primary: #1a1820;
+  --bg-card: #252230;
+  --bg-surface: #2d2838;
+  --text-primary: #e8e4e0;
+  --text-secondary: #b0aaa8;
+  --text-muted: #7a7472;
+  --accent: #c4a8a0;
+  --accent-secondary: #8a9bb0;
+  --accent-tertiary: #8a9a8a;
+  --border: #3a3440;
+  --shadow: rgba(0,0,0,0.4);
+  --danger: #c46a6a;
+  --success: #7a9a7a;
+  --gold: #b8a070;
+  --purple: #a080b0;
+  --font-size-base: 14px;
+  --font-size-sm: 13px;
+  --font-size-xs: 12px;
+  --line-height-body: 1.7;
+  --line-height-card: 1.6;
+  --line-height-list: 1.5;
+  --card-radius: 12px;
+  --card-padding: 14px;
+  --panel-radius: 16px;
+  --transition-fast: 0.2s;
+}
+
+/* ---------- Làm mịn phông chữ toàn cục ---------- */
+html, body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Vùng chứa bảng điều khiển (Mặc định desktop) ---------- */
+.htyq-lite-panel {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 560px;
+  max-width: 90vw;
+  height: 70vh;
+  max-height: 800px;
+  min-height: 400px;
+  background: rgba(26, 24, 32, 0.95);
+  backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  border-radius: var(--panel-radius);
+  box-shadow: 0 8px 20px var(--shadow);
+  border: 1px solid var(--border);
+  display: none;
+  flex-direction: column;
+  z-index: 10001;
+  overflow: hidden;
+}
+
+/* ---------- Thích ứng tablet ---------- */
+@media (max-width: 768px) {
+  .htyq-lite-panel {
+    width: 100vw;
+    height: calc(100vh - 80px);
+    max-width: 100vw;
+    max-height: none;
+    bottom: 0;
+    right: 0;
+    border-radius: 16px 16px 0 0;
+    top: auto;
+    background: rgba(26, 24, 32, 0.96);
+  }
+  .htyq-lite-view {
+    padding: 12px 14px;
+  }
+  .htyq-lite-tab {
+    min-height: 44px;
+    padding: 10px 0;
+    flex: 1;
+    text-align: center;
+  }
+  .htyq-lite-tabs {
+    position: sticky;
+    top: 0;
+    background: rgba(26, 24, 32, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 2;
+  }
+}
+
+/* ---------- Thích ứng màn hình nhỏ ---------- */
+@media (max-height: 700px) {
+  .htyq-lite-panel {
+    height: 80vh;
+  }
+}
+
+/* ---------- Thích ứng di động (Bao phủ toàn màn hình) ---------- */
+@media (max-width: 480px) {
+  .htyq-lite-panel {
+    width: 100vw;
+    height: calc(100vh - 70px);
+    max-width: 100vw;
+    max-height: none;
+    border-radius: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 0;
+    background: var(--bg-primary);
+    backdrop-filter: none;
+  }
+  .htyq-lite-tab {
+    font-size: var(--font-size-sm);
+    padding: 10px 0;
+    min-height: 44px;
+  }
+  .htyq-lite-tabs {
+    position: sticky;
+    top: 0;
+    background: rgba(26, 24, 32, 0.96);
+    z-index: 2;
+    backdrop-filter: blur(4px);
+  }
+  .htyq-lite-view {
+    padding: 12px 14px;
+  }
+  .htyq-lite-card {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+}
+
+/* ---------- Header bảng điều khiển ---------- */
+.htyq-lite-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+}
+.htyq-lite-panel-title {
+  font-weight: bold;
+  color: var(--accent);
+  font-size: 15px;
+}
+.htyq-lite-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+.htyq-lite-panel-close:hover {
+  color: var(--text-primary);
+}
+
+/* ---------- Thanh chỉ báo kéo trên di động ---------- */
+.htyq-lite-drag-handle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+  position: relative;
+  min-height: 32px;
+}
+.htyq-lite-handle-bar {
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--text-muted);
+  margin: 0 auto;
+}
+.htyq-lite-panel-close-mobile {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  line-height: 1;
+  transition: color var(--transition-fast);
+  z-index: 3;
+}
+.htyq-lite-panel-close-mobile:hover {
+  color: var(--text-primary);
+}
+
+/* ---------- Thanh tab ---------- */
+.htyq-lite-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-primary);
+  flex-shrink: 0;
+}
+.htyq-lite-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  user-select: none;
+  border-bottom: 2px solid transparent;
+}
+.htyq-lite-tab:hover {
+  color: var(--text-secondary);
+}
+.htyq-lite-tab.active {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+
+/* ---------- Vùng chứa góc nhìn ---------- */
+.htyq-lite-view {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: none;
+  line-height: var(--line-height-card);
+  word-break: break-word;
+  font-size: var(--font-size-base);
+}
+.htyq-lite-view.active {
+  display: block;
+}
+
+/* ---------- Thẻ ---------- */
+.htyq-lite-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px var(--shadow);
+  line-height: var(--line-height-list);
+}
+.htyq-lite-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+}
+.htyq-lite-card > div,
+.htyq-lite-card > ul,
+.htyq-lite-card > p {
+  line-height: var(--line-height-card);
+  margin-bottom: 6px;
+}
+.htyq-lite-card > div:last-child,
+.htyq-lite-card > ul:last-child,
+.htyq-lite-card > p:last-child {
+  margin-bottom: 0;
+}
+.htyq-lite-card ul {
+  padding-left: 16px;
+  margin: 4px 0;
+  list-style: none;
+}
+.htyq-lite-card ul li {
+  margin-bottom: 4px;
+  line-height: var(--line-height-list);
+  position: relative;
+  padding-left: 14px;
+}
+.htyq-lite-card ul li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+/* ---------- Hộp tìm kiếm ---------- */
+.htyq-lite-search {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-list);
+  box-sizing: border-box;
+}
+.htyq-lite-search:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(196, 168, 160, 0.2);
+}
+
+/* ---------- Mục ký ức ---------- */
+.htyq-lite-memory-item {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-list);
+}
+.htyq-lite-memory-item .memory-summary {
+  line-height: var(--line-height-list);
+  margin-bottom: 4px;
+}
+.htyq-lite-memory-item small {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.htyq-lite-memory-item details {
+  margin-top: 6px;
+}
+.htyq-lite-memory-item summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+.htyq-lite-memory-item pre {
+  background: var(--bg-primary);
+  padding: 8px;
+  border-radius: 6px;
+  font-size: var(--font-size-xs);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: var(--line-height-list);
+  margin-top: 6px;
+}
+
+/* ---------- Màu phân cấp độ quan trọng ký ức (Màu Morandi) ---------- */
+.htyq-lite-memory-imp-5 { border-left: 3px solid var(--gold) !important; }
+.htyq-lite-memory-imp-4 { border-left: 3px solid var(--purple) !important; }
+.htyq-lite-memory-imp-3 { border-left: 3px solid var(--accent-secondary) !important; }
+.htyq-lite-memory-imp-1 { border-left: 2px solid var(--text-muted) !important; }
+
+/* ---------- Vùng chứa kết quả ký ức ---------- */
+.htyq-memory-results {
+  /* container for memory search results */
+}
+.htyq-lite-empty {
+  color: var(--text-muted);
+  padding: 8px;
+}
+
+/* ---------- Thống kê ký ức ---------- */
+.htyq-memory-stats {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  padding: 12px;
+  margin-bottom: 10px;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-card);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+/* ---------- Nhóm nhập liệu ---------- */
+.htyq-lite-input-group {
+  margin-bottom: 12px;
+}
+.htyq-lite-input-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  line-height: var(--line-height-list);
+}
+.htyq-lite-input-group input[type="text"],
+.htyq-lite-input-group input[type="password"],
+.htyq-lite-input-group select {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-list);
+  box-sizing: border-box;
+}
+.htyq-lite-input-group input[type="text"]:focus,
+.htyq-lite-input-group input[type="password"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.htyq-lite-input-group input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+  transform: scale(1.1);
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+.htyq-lite-input-group small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ---------- Hệ thống nút (Morandi) ---------- */
+.htyq-lite-btn {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all var(--transition-fast);
+  line-height: var(--line-height-list);
+}
+.htyq-lite-btn:hover {
+  background: #3a3440;
+  border-color: var(--accent);
+}
+.htyq-lite-btn:active {
+  background: #4a3c48;
+}
+.htyq-lite-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.htyq-lite-btn-purple {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+.htyq-lite-btn-purple:hover {
+  background: rgba(160, 128, 176, 0.15);
+}
+.htyq-lite-btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.htyq-lite-btn-danger:hover {
+  background: rgba(196, 106, 106, 0.15);
+}
+.htyq-lite-btn-success {
+  border-color: var(--success);
+  color: var(--success);
+}
+.htyq-lite-btn-success:hover {
+  background: rgba(122, 154, 122, 0.15);
+}
+.htyq-lite-btn-accent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.htyq-lite-btn-accent:hover {
+  background: rgba(196, 168, 160, 0.15);
+}
+
+/* ---------- Phản hồi lỗi ---------- */
+.htyq-lite-error {
+  border-left-color: var(--danger) !important;
+}
+
+/* ---------- Toast ---------- */
+.htyq-lite-toast {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: var(--font-size-sm);
+  z-index: 10002;
+  box-shadow: 0 2px 8px var(--shadow);
+  pointer-events: none;
+  line-height: var(--line-height-list);
+}
+.htyq-lite-toast.error {
+  background: rgba(196, 106, 106, 0.2);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ============================================================ */
+/* v2.2.0 — Cải thiện UI desktop                                  */
+/* ============================================================ */
+
+/* ---------- Vùng chứa hiển thị nhãn ---------- */
+.htyq-tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0;
+}
+.htyq-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Màu nhãn (Màu Morandi) ---------- */
+.htyq-tag-entity   { background: #3a3440; color: #c4a8a0; }
+.htyq-tag-location { background: #2d3840; color: #8a9bb0; }
+.htyq-tag-faction  { background: #3a3830; color: #b8a070; }
+.htyq-tag-topic    { background: #383040; color: #a080b0; }
+.htyq-tag-emotion  { background: #3a3038; color: #c4a0a0; }
+.htyq-tag-state    { background: #303838; color: #7a9a7a; }
+
+/* ---------- Khu vực xem trước injection ---------- */
+.htyq-injection-meta {
+  display: flex;
+  gap: 12px;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.htyq-injection-meta span {
+  background: var(--bg-primary);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.htyq-injection-preview-text {
+  background: var(--bg-primary);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-list);
+  max-height: 120px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ---------- Mở/gập (Desktop) ---------- */
+@media (min-width: 769px) {
+  .htyq-lite-card h4 {
+    cursor: pointer;
+    user-select: none;
+    transition: opacity var(--transition-fast);
+  }
+  .htyq-lite-card h4:hover {
+    opacity: 0.8;
+  }
+  .htyq-lite-card h4::before {
+    content: '▼ ';
+    font-size: 10px;
+    vertical-align: middle;
+    color: var(--text-muted);
+  }
+  .htyq-lite-card.collapsed h4::before {
+    content: '▶ ';
+  }
+  .htyq-lite-card.collapsed > div,
+  .htyq-lite-card.collapsed > ul,
+  .htyq-lite-card.collapsed > p,
+  .htyq-lite-card.collapsed > .htyq-tag-container,
+  .htyq-lite-card.collapsed > .htyq-injection-meta,
+  .htyq-lite-card.collapsed > .htyq-injection-preview-text {
+    display: none;
+  }
+  .htyq-lite-card.collapsed {
+    margin-bottom: 8px;
+  }
+}
+
+/* ---------- Mở rộng chi tiết xem trước injection ---------- */
+.htyq-injection-detail-toggle {
+  color: var(--accent);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  margin-top: 4px;
+  display: inline-block;
+}
+.htyq-injection-detail-toggle:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================ */
+/* v2.3.0 — Kiểu Tab động cơ + Màu nhãn trạng thái               */
+/* ============================================================ */
+
+/* ---------- Vùng chứa khu vực Tab động cơ ---------- */
+.htyq-engine-section {
+  margin-bottom: 14px;
+}
+.htyq-engine-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- Lựa chọn chế độ truyền động ---------- */
+.htyq-drive-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  line-height: var(--line-height-list);
+}
+.htyq-drive-option:hover {
+  border-color: var(--accent);
+  background: rgba(196, 168, 160, 0.05);
+}
+.htyq-drive-option.selected {
+  border-color: var(--accent);
+  background: rgba(196, 168, 160, 0.08);
+}
+.htyq-drive-option input[type="radio"] {
+  margin-top: 3px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.htyq-drive-option .htyq-drive-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.htyq-drive-option .htyq-drive-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ---------- Chỉ báo trạng thái chế độ truyền động ---------- */
+.htyq-drive-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  border-radius: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.htyq-drive-status .htyq-drive-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+.htyq-drive-badge-ai {
+  background: rgba(196, 168, 160, 0.2);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+.htyq-drive-badge-manual {
+  background: rgba(138, 155, 176, 0.2);
+  color: var(--accent-secondary);
+  border: 1px solid var(--accent-secondary);
+}
+
+/* ---------- Trạng thái phong ấn ---------- */
+.htyq-time-sealed {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* ---------- Khu vực thông số thủ công (Trạng thái xám) ---------- */
+.htyq-manual-section-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(0.8);
+}
+
+/* ---------- Hàng thông số ---------- */
+.htyq-param-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.htyq-param-row label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  min-width: 90px;
+  flex-shrink: 0;
+}
+.htyq-param-row input[type="number"],
+.htyq-param-row input[type="text"] {
+  flex: 1;
+  min-width: 60px;
+  max-width: 100px;
+  padding: 6px 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+.htyq-param-row input[type="number"]:focus,
+.htyq-param-row input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.htyq-param-row small {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+.htyq-param-row span {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------- Checkbox nội dung suy diễn ---------- */
+.htyq-evolve-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0;
+}
+.htyq-evolve-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  line-height: var(--line-height-list);
+}
+.htyq-evolve-checkboxes input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+/* ---------- Hiển thị trạng thái hiện tại (Chỉ đọc) ---------- */
+.htyq-state-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--bg-primary);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: var(--font-size-sm);
+}
+.htyq-state-row .htyq-state-label {
+  color: var(--text-secondary);
+}
+.htyq-state-row .htyq-state-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ---------- Hiển thị thời gian thế giới (Trên cùng trang tổng quan) ---------- */
+.htyq-world-time-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px var(--shadow);
+  font-size: var(--font-size-sm);
+}
+.htyq-world-time-bar .htyq-time-icon {
+  font-size: 16px;
+}
+.htyq-world-time-bar .htyq-time-label {
+  color: var(--text-muted);
+}
+.htyq-world-time-bar .htyq-time-value {
+  color: var(--accent);
+  font-weight: 600;
+  margin-left: auto;
+}
+.htyq-world-time-bar.htyq-time-sealed {
+  border-color: rgba(196, 106, 106, 0.3);
+}
+.htyq-world-time-bar.htyq-time-sealed .htyq-time-value {
+  color: var(--danger);
+}
+
+/* ---------- Nút công cụ gỡ lỗi ---------- */
+.htyq-debug-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.htyq-debug-btns .htyq-lite-btn {
+  font-size: var(--font-size-xs);
+  padding: 6px 12px;
+}
+
+/* ---------- Checkbox công tắc từ khóa (Tab động cơ) ---------- */
+.htyq-keyword-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+.htyq-keyword-toggle:hover {
+  border-color: var(--accent);
+}
+.htyq-keyword-toggle input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+.htyq-keyword-toggle .htyq-kw-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.htyq-keyword-toggle .htyq-kw-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+.htyq-keyword-toggle.htyq-kw-hidden {
+  display: none;
+}
+
+/* ---------- Nút reset tab động cơ (Inline ở dưới khu vực) ---------- */
+.htyq-engine-reset-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
