@@ -93,7 +93,7 @@ Cảm Xúc Cốt Lõi: ${emotionText}
     `.trim();
 
     const worldbookSection = worldbookTexts.length ?
-      '【Tham Khảo Thế Giới Thư】\n' + worldbookTexts.map((t,i) => `${i+1}. ${t.substring(0, 300)}`).join('\n') :
+      '【Tham Khảo Thế Giới Thư】\n' + worldbookTexts.map((t,i) => `${i+1}. ${t.length > 800 ? t.substring(0, 800) + '...' : t}`).join('\n') :
       '【Tham Khảo Thế Giới Thư】 Không';
 
     let finalContext = `
